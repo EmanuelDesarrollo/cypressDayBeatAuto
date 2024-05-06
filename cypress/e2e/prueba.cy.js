@@ -1,6 +1,7 @@
 describe('template spec', () => {
   it('passes', () => {
-    cy.visit('http://172.41.0.22/day_beat_smart/home/default2.htm')
+    cy.visit('http://172.41.0.22/day_beat_smart/home/default2.htm');
+
     // cy.wait(5000);
     // cy.get('html').find('body').each(($el) => {
     //   console.log($el.attr('id'));
@@ -46,6 +47,9 @@ describe('template spec', () => {
       });
     });
     cy.wait(1000);
+
+    //iterar por registro 
+
     cy.get('frame').then(($frame) => {
       const doc = $frame.contents();
 
@@ -87,6 +91,9 @@ describe('template spec', () => {
     });
 
     cy.wait(1000);
+    cy.on('window:alert', (text) => {
+      expect(text).to.contains('Transacción ingresada éxitosamente');
+    });
     cy.get('frame').then(($frame) => {
 
       const doc = $frame.contents();
@@ -104,30 +111,45 @@ describe('template spec', () => {
             cy.wrap($selector).select('Desarrollo');
             console.log('====================================');
           }
+          if (element.name === 'cod_tipotransaccion') {
+            console.log('====================================');
+            console.log('element', element);
+            cy.wrap($selector).select('PUB/NE - 1-Ejecución desarrollo');
+            console.log('====================================');
+          }
         }
       }
-      // selector1.each((selector) => {D
-      //   console.log(selector);
-      //   const $selector = Cypress.$(selector);
-      //   const id = $selector.attr('name');
-      //   const id2 = selector1.attr('name');
-      //   // const id3 = selector.attr('name');
-      //   console.log('selector id ', id, id2);
 
-      //   if ('id_categoria' === id) {
-      //     cy.wrap(selector).select('Desarrollo');
-      //     console.log('seleccione en id_categoria, Desarrollo');
-      //   }
+      
+      const shortDes = doc.find('input[name="descripcion_corta"]');
+      cy.wrap(shortDes).type('Prueba Descripcion');
 
-      //   if ('cod_tipotransaccion' == id) {
-      //     selector.select('PUB/NE - 16-Investigación'); //variable
-      //     console.log('seleccione en cod_tipotransaccion, Desarrollo');
-      //   }
+      const fechaini = doc.find('input[name="fechaini"]');
+      cy.wrap(fechaini).type('06052024');//dia mes año
 
-      // });
+    
+      const horaini = doc.find('input[name="horaini"]');
+      cy.wrap(horaini).type('0753');
 
+      const horafin = doc.find('input[name="horafin"]');
+      cy.wrap(horafin).type('0754');
 
+      
+      const longDes = doc.find('textarea[name="texto_largo"]');
+      cy.wrap(longDes).type('Prueba Descripcion Larga', {force: true});
+      
+      const ingTr = doc.find('input[value="Ingresar Transacción"]');
+      
+      //ni puta idea
+      const stub = cy.stub();
+      cy.on('window:confirm', stub);
 
+      cy.wrap(ingTr).click().then(() => {
+        expect(stub.getCall(0)).to.be.calledWith('Transacción ingresada éxitosamente');
+        cy.on('window:confirm', () => true);
+      });
+
+      
 
     });
 
